@@ -299,7 +299,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app3.ico" />
-    <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

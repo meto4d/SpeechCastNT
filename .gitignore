@@ -51,9 +51,6 @@ Temporary Items
 .gitignore
 
 # Visual Studio User setting files
-SpeechCastNT.v12.suo
-SpeechCast.sln
-SpeechCast.v12.suo
 SpeechCast.csproj
 SpeechCast.csproj.user
 SpeechCastNT.csproj
@@ -62,6 +59,9 @@ bin
 bin.bak
 obj
 Service References
+SpeechCastNT.v12.suo
+SpeechCast.sln
+SpeechCast.v12.suo
 log.xml
 ActivityLog.xsl
 Debug
