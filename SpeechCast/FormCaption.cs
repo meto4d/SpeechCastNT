@@ -7,7 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Text;
 using System.Windows.Forms;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public partial class FormCaption : Form
     {
@@ -15,17 +15,31 @@ namespace SpeechCast
         public FormCaption()
         {
             InitializeComponent();
-            this.titleText = "SpeechCast";
+            this.titleText = "SpeechCastNT";
         }
 
         public void setTitle(string title){
             if(title!=""){
                 this.titleText = title;
             }else{
-                this.titleText = "SpeechCast";
+                this.titleText = "SpeechCastNT";
             }
         }
         public static FormCaption Instance;
+
+        private bool resbanVisible = false;
+        public bool ResbanVisible
+        {
+            set
+            {
+                resbanVisible = value;
+                this.Refresh();
+            }
+            get
+            {
+                return this.resbanVisible;
+            }
+        }
 
         private bool borderVisible = false;
         public bool BorderVisible
@@ -40,6 +54,8 @@ namespace SpeechCast
                 return this.borderVisible;
             }
         }
+
+        //字幕描画　全体
         private void FormCaption_Paint(object sender, PaintEventArgs e)
         {
             if (borderVisible)            

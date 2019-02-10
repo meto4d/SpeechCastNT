@@ -1,4 +1,4 @@
-﻿namespace SpeechCast
+﻿namespace SpeechCastNT
 {
     partial class FormEditFontColors
     {

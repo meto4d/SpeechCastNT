@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Reflection;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public partial class FormAbout : Form
     {

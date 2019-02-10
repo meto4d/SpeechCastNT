@@ -4,7 +4,7 @@ using System.Text;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace SpeechCast.Controls
+namespace SpeechCastNT.Controls
 {
     public class MyMenuStrip : MenuStrip
     {

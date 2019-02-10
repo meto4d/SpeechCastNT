@@ -1,4 +1,4 @@
-﻿namespace SpeechCast
+﻿namespace SpeechCastNT
 {
     partial class FormAbout
     {
@@ -61,7 +61,7 @@
             this.labelVersion.Name = "labelVersion";
             this.labelVersion.Size = new System.Drawing.Size(169, 16);
             this.labelVersion.TabIndex = 3;
-            this.labelVersion.Text = "SpeechCast Version ";
+            this.labelVersion.Text = "SpeechCastNT Version ";
             // 
             // buttonOK
             // 

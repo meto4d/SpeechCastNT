@@ -1,4 +1,4 @@
-﻿namespace SpeechCast.Controls
+﻿namespace SpeechCastNT.Controls
 {
     partial class FormWaitForEdit
     {

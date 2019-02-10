@@ -1,4 +1,4 @@
-﻿namespace SpeechCast
+﻿namespace SpeechCastNT
 {
     partial class FormWrite
     {
@@ -38,7 +38,7 @@
             this.buttonOK = new System.Windows.Forms.Button();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonPlay = new System.Windows.Forms.Button();
-            this.buttonRunEditor = new SpeechCast.Controls.ButtonRunEditor();
+            this.buttonRunEditor = new SpeechCastNT.Controls.ButtonRunEditor();
             this.checkBoxSage = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
@@ -141,7 +141,7 @@
             this.buttonRunEditor.Size = new System.Drawing.Size(53, 30);
             this.buttonRunEditor.TabIndex = 6;
             this.buttonRunEditor.TextBox = this.textBoxContents;
-            this.buttonRunEditor.GetEditorFilePath += new SpeechCast.Controls.GetEditorFilePathEventHandler(this.buttonRunEditor_GetEditorFilePath);
+            this.buttonRunEditor.GetEditorFilePath += new SpeechCastNT.Controls.GetEditorFilePathEventHandler(this.buttonRunEditor_GetEditorFilePath);
             // 
             // checkBoxSage
             // 
@@ -199,7 +199,7 @@
         private System.Windows.Forms.TextBox textBoxMailAddress;
         private System.Windows.Forms.Button buttonOK;
         private System.Windows.Forms.Button buttonCancel;
-        private SpeechCast.Controls.ButtonRunEditor buttonRunEditor;
+        private SpeechCastNT.Controls.ButtonRunEditor buttonRunEditor;
         private System.Windows.Forms.Button buttonPlay;
         private System.Windows.Forms.CheckBox checkBoxSage;
     }

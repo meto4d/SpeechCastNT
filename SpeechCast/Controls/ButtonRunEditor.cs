@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
 
-namespace SpeechCast.Controls
+namespace SpeechCastNT.Controls
 {
     public partial class ButtonRunEditor : UserControl
     {

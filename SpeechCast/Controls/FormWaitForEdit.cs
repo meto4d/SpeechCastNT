@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 
-namespace SpeechCast.Controls
+namespace SpeechCastNT.Controls
 {
     public partial class FormWaitForEdit : Form
     {

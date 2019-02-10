@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Xml.Serialization;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     [Serializable]
     public class CaptionFont

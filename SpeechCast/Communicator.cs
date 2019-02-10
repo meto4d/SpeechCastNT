@@ -6,17 +6,25 @@ using System.Net;
 using System.Web;
 
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     class Communicator
     {
-        public static Regex JBBSRegex = new System.Text.RegularExpressions.Regex(@"(http://jbbs.livedoor.jp|http://jbbs.shitaraba.net)/bbs/read.cgi(/(\w+)/(\d+)/(\d+)/)");
-        public static Regex YYRegex = new System.Text.RegularExpressions.Regex(@"(http://yy.+\..+|http://bbs\.aristocratism\.info|http://www.+\.atchs\.jp)/.+/read.cgi/(\w+)/(\d+)/");
-        public static Regex NichanRegex = new System.Text.RegularExpressions.Regex(@"(http://.+2ch\.net)/.+/read.cgi/(\w+)/(\d+)/");
+        public static Regex JBBSRegex = new System.Text.RegularExpressions.Regex(@"(https?://jbbs.livedoor.jp|https?://jbbs.shitaraba.net)/bbs/read.cgi(/(\w+)/(\d+)/(\d+)/)");
+        public static Regex YYRegex = new System.Text.RegularExpressions.Regex(@"(https?://yy.+\..+|http://bbs\.aristocratism\.info|https?://www.+\.atchs\.jp)/.+/read.cgi/(\w+)/(\d+)/");
+        public static Regex NichanRegex = new System.Text.RegularExpressions.Regex(@"(https?://.+[25]ch\.net)/.+/read.cgi/(\w+)/(\d+)/");
 
-        public static Regex JBBSBaseRegex = new System.Text.RegularExpressions.Regex(@"(http://jbbs.livedoor.jp|http://jbbs.shitaraba.net)/(\w+)/(\d+)/");
-        public static Regex YYBaseRegex = new System.Text.RegularExpressions.Regex(@"(http://yy.+\..+|http://bbs\.aristocratism\.info|http://www.+\.atchs\.jp)/(\w+)/");
-        public static Regex NichanBaseRegex = new System.Text.RegularExpressions.Regex(@"(http://.+2ch\.net)/(\w+)/");
+        public static Regex JBBSBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://jbbs.livedoor.jp|https?://jbbs.shitaraba.net)/(\w+)/(\d+)/");
+        public static Regex YYBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://yy.+\..+|http://bbs\.aristocratism\.info|https?://www.+\.atchs\.jp)/(\w+)/");
+        public static Regex NichanBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://.+[25]ch\.net)/(\w+)/");
+
+        /// <summary>
+        /// ぜろちゃんねるプラス
+        /// </summary>
+        public static Regex ZeroRegex = new System.Text.RegularExpressions.Regex(@"(https?://.+\.pgw\.jp)/2ch/.+/read.cgi/(\w+)/(\d+)/");
+        // http://meto4d.pgw.jp/2ch/test/read.cgi/kagamin/1490441818/
+        public static Regex ZeroBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://.+\.pgw\.jp)/2ch/(\w+)/");
+
 
         public static Regex htmlBodyRegex = new System.Text.RegularExpressions.Regex("<body.*?>(.*)</body>", RegexOptions.IgnoreCase);
 
@@ -41,6 +49,9 @@ namespace SpeechCast
                 case Response.BBSStyle.nichan:
                     m = NichanRegex.Match(ThreadURL);
                     break;
+                case Response.BBSStyle.zerochan:
+                    m = ZeroRegex.Match(ThreadURL);
+                    break;
             }
             return m;
         }
@@ -59,6 +70,9 @@ namespace SpeechCast
                 case Response.BBSStyle.nichan:
                     m = NichanBaseRegex.Match(BaseURL);
                     break;
+                case Response.BBSStyle.zerochan:
+                    m = ZeroBaseRegex.Match(BaseURL);
+                    break;
             }
             return m;
         }
@@ -73,6 +87,7 @@ namespace SpeechCast
                     encodingName = "EUC-JP";
                     break;
                 case Response.BBSStyle.yykakiko:
+                case Response.BBSStyle.zerochan:
                 case Response.BBSStyle.nichan:
                     encodingName = "Shift_JIS";
                     break;
@@ -89,8 +104,20 @@ namespace SpeechCast
         {
             string title = "";
 
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                   | SecurityProtocolType.Tls11
+                   | SecurityProtocolType.Tls12
+                   | SecurityProtocolType.Ssl3;
             System.Net.HttpWebRequest webReq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(BaseURL);
             FormMain.UserConfig.SetProxy(webReq);
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                   | SecurityProtocolType.Tls11
+                   | SecurityProtocolType.Tls12
+                   | SecurityProtocolType.Ssl3;
             System.Net.HttpWebResponse webRes = null;
 
             try
@@ -253,14 +280,74 @@ namespace SpeechCast
                             }
                             break;
                         }
+                    case Response.BBSStyle.zerochan:
+                        {
+                            url = string.Format("{0}/2ch/test/bbs.cgi", m.Groups[1].Value);
+
+                            string submitText = "書き込む";
+                            string additionalParam = "";
+                            string nameText = name;
+                            string subject = "";
+
+                            if (isThreadCreation)
+                            {
+                                submitText = "新規スレッド作成";
+                                subject = title;
+                                additionalParam += "&subject=" + UrlEncode(subject);
+                            }
+                            else
+                            {
+                                additionalParam += "&key=" + m.Groups[3].Value;
+                            }
+
+
+
+                            if (i == 1)
+                            {
+                                submitText = "上記全てを承諾して書き込む";
+                            }
+
+                            if (Response.Style == Response.BBSStyle.zerochan)
+                            {
+                                additionalParam += "&tepo=don";
+                            }
+
+
+
+                            postData = string.Format("bbs={0}&time={1}&FROM={2}&mail={3}&MESSAGE={4}&submit={5}" + additionalParam
+                                , m.Groups[2].Value
+                                , unixTime
+                                , UrlEncode(nameText)
+                                , UrlEncode(mailAddress)
+                                , UrlEncode(contents)
+                                , UrlEncode(submitText)
+                                );
+
+                            if (i == 1)
+                            {
+                                url += "?guid=ON";
+                            }
+
+                            if (Response.Style == Response.BBSStyle.nichan && isThreadCreation)
+                            {
+                                referer = url;
+                            }
+                            break;
+                        }
                 }
 
                 byte[] postDataBytes = System.Text.Encoding.ASCII.GetBytes(postData);
 
+
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                       | SecurityProtocolType.Tls11
+                       | SecurityProtocolType.Tls12
+                       | SecurityProtocolType.Ssl3;
                 System.Net.HttpWebRequest webReq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
                 FormMain.UserConfig.SetProxy(webReq);
 
-                webReq.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows XP)";
+                webReq.UserAgent = "Mozilla/5.0 (Windows NT 6.1; Trident/7.0; rv:11.0) like Gecko";
 
                 //Cookieの設定
                 webReq.CookieContainer = new CookieContainer();
@@ -278,6 +365,11 @@ namespace SpeechCast
                 webReq.Referer = referer;
 
 
+                ServicePointManager.Expect100Continue = true;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                       | SecurityProtocolType.Tls11
+                       | SecurityProtocolType.Tls12
+                       | SecurityProtocolType.Ssl3;
                 System.Net.HttpWebResponse webRes = null;
 
                 try
@@ -371,6 +463,15 @@ namespace SpeechCast
             if (m.Success)
             {
                 ThreadURL = string.Format("{0}/test/read.cgi/{1}/{2}/"
+                    , m.Groups[1].Value
+                    , m.Groups[2].Value
+                    , ThreadID);
+                return ThreadURL;
+            }
+            m = Communicator.ZeroBaseRegex.Match(baseURL);
+            if (m.Success)
+            {
+                ThreadURL = string.Format("{0}/2ch/test/read.cgi/{1}/{2}/"
                     , m.Groups[1].Value
                     , m.Groups[2].Value
                     , ThreadID);

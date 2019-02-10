@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     class Response
     {
@@ -30,6 +30,7 @@ namespace SpeechCast
                 switch (Style)
                 {
                     case BBSStyle.jbbs:
+                    case BBSStyle.zerochan:
                         return 1000;
                     case BBSStyle.yykakiko:
                     case BBSStyle.nichan:
@@ -57,6 +58,10 @@ namespace SpeechCast
             /// 2ch形式
             /// </summary>
             nichan,
+            /// <summary>
+            /// ぜろちゃんねる形式
+            /// </summary>
+            zerochan,
         }
 
         public Response()
@@ -101,6 +106,7 @@ namespace SpeechCast
 
                     break;
                 case BBSStyle.yykakiko:
+                case BBSStyle.zerochan:
                 case BBSStyle.nichan:
                     {
                         string[] values = rawText.Split(delimStrings, StringSplitOptions.None);

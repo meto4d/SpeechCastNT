@@ -8,8 +8,8 @@
     <ProjectGuid>{DFE33770-559F-4DA1-8C41-49E9A71123D6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SpeechCast</RootNamespace>
-    <AssemblyName>SpeechCast</AssemblyName>
+    <RootNamespace>SpeechCastNT</RootNamespace>
+    <AssemblyName>SpeechCastNT</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>app3.ico</ApplicationIcon>
@@ -29,8 +29,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>2.0.0.1</ApplicationVersion>
+    <ApplicationRevision>24</ApplicationRevision>
+    <ApplicationVersion>1.0.0.24</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -231,6 +231,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormViewResource.resx">
       <DependentUpon>FormViewResource.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FormAbout.resx">
       <DependentUpon>FormAbout.cs</DependentUpon>
@@ -258,9 +259,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormMain.resx">
       <DependentUpon>FormMain.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FormSettings.resx">
       <DependentUpon>FormSettings.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="FormBBSThreads.resx">
       <DependentUpon>FormBBSThreads.cs</DependentUpon>
@@ -268,6 +271,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormWrite.resx">
       <DependentUpon>FormWrite.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -292,12 +296,10 @@
     </Compile>
     <Compile Include="Response.cs" />
     <Compile Include="UseConfig.cs" />
-    <Content Include="README.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="app3.ico" />
+    <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

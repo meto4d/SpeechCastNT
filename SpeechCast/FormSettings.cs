@@ -9,7 +9,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Media;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public partial class FormSettings : Form
     {
@@ -106,6 +106,12 @@ namespace SpeechCast
             this.checkBoxSpeaksResNumber.Checked = userConfig.SpeaksResNumber;
             this.checkBoxGZipCompression.Checked = userConfig.GZipCompressionEnabled;
             this.checkBoxUseProxy.Checked = userConfig.UseDefaultProxy;
+////////////////////////
+            this.checkBoxNotUseProxy.Checked = userConfig.proxy_notuse;
+            this.checkBoxProxy.Checked = userConfig.proxy_use;
+            this.textBoxProxyHost.Text = userConfig.proxy_host;
+            this.textBoxProxyPort.Text = userConfig.proxy_port;
+////////////////////////
             this.checkBoxShowCaptionImmediately.Checked = userConfig.ShowCaptionImmediately;
             this.CaptionFont = userConfig.CaptionFont;
             this.AACaptionFont = userConfig.AACaptionFont;
@@ -209,6 +215,12 @@ namespace SpeechCast
             userConfig.UpdatePronounciations();
             userConfig.GZipCompressionEnabled = checkBoxGZipCompression.Checked;
             userConfig.UseDefaultProxy = checkBoxUseProxy.Checked;
+            /////////////////////////////////////////
+            userConfig.proxy_use = checkBoxProxy.Checked;
+            userConfig.proxy_notuse = this.checkBoxNotUseProxy.Checked;
+            userConfig.proxy_host = this.textBoxProxyHost.Text;
+            userConfig.proxy_port = this.textBoxProxyPort.Text;
+            /////////////////////////////////////////
             userConfig.ShowCaptionImmediately = checkBoxShowCaptionImmediately.Checked;
             FormMain.Instance.toolStripButtonShowCaptionImmediately.Checked = checkBoxShowCaptionImmediately.Checked;
             userConfig.ReduceFontSizeByWindowWidth = checkBoxReduceFontSizeByWindowWidth.Checked;
@@ -415,7 +427,7 @@ namespace SpeechCast
 
         }
 
-        private void buttonRunEditor_GetEditorFilePath(object sender, SpeechCast.Controls.EventEditorArgs e)
+        private void buttonRunEditor_GetEditorFilePath(object sender, SpeechCastNT.Controls.EventEditorArgs e)
         {
             e.EditorFilePath = textBoxEditorFilePath.Text;
         }
@@ -624,6 +636,11 @@ namespace SpeechCast
         private void button5_Click(object sender, EventArgs e)
         {
             FormMain.Instance.insertTextBox(this.textBoxCommandLineParam, "#Time#");
+
+        }
+
+        private void checkBoxProxy_CheckedChanged(object sender, EventArgs e)
+        {
 
         }
 

@@ -16,8 +16,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Net;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public partial class FormMain : Form
     {
@@ -71,7 +72,7 @@ namespace SpeechCast
             webBrowser.DocumentText = html;
         }
 
-        static Regex youtubeId = new Regex(@"http[s]?://www.youtube.com/watch\?v=([\d\w\-_]*)", RegexOptions.IgnoreCase);
+        static Regex youtubeId = new Regex(@"http([s]?)://www.youtube.com/watch\?v=([\d\w\-_]*)", RegexOptions.IgnoreCase);
         // ブラウザ内リンクのイベント追加
         void webBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
@@ -102,7 +103,7 @@ namespace SpeechCast
                     oepnFormViewNewtabYoutube(id);
                 }
             }
-            else if (diffurl.StartsWith("http:"))
+            else if (diffurl.StartsWith("http:") || diffurl.StartsWith("https:"))
             {
                 System.Diagnostics.Process.Start(url);
                 e.Cancel = true;
@@ -115,7 +116,7 @@ namespace SpeechCast
         // 代替テキスト
         public string CaptionTextBuffer{
             // 数値と時計の自動変換
-            get { return captionTextBuffer.Replace("#1#", comboBoxCaptionNum1.SelectedIndex.ToString()).Replace("#2#", comboBoxCaptionNum2.SelectedIndex.ToString()).Replace("#CLOCK#", objDate.ToString(dateformat)); }
+            get { return captionTextBuffer.Replace("#1#", comboBoxCaptionNum1.SelectedIndex.ToString()).Replace("#2#", comboBoxCaptionNum2.SelectedIndex.ToString()).Replace("#CLOCK#", objDate.ToString(dateformat)).Replace("#CLOCKm#", objDate.ToString(dateformatms)); }
             set {captionTextBuffer = value;}
         }
         // ステータスバーの表示テキスト
@@ -163,6 +164,9 @@ namespace SpeechCast
                     &&  (speakClipboard == false && endThreadWarning == false))
                 {
                     CurrentResNumber++;
+/////////////////////////////////////////////////////////////////////////////////////////
+                    endThreadAlertCount = 0;
+/////////////////////////////////////////////////////////////////////////////////////////
                 }
             }
         }
@@ -295,9 +299,11 @@ namespace SpeechCast
         }
 
 
-        Regex jbbsBaseRegex = new System.Text.RegularExpressions.Regex(@"(http://(jbbs.livedoor.jp|jbbs.shitaraba.net)/\w+/\d+/)");
-        Regex nichanBaseRegex = new System.Text.RegularExpressions.Regex(@"(http://.+2ch\.net/\w+/)\s*$");
-        Regex yyBaseRegex = new System.Text.RegularExpressions.Regex(@"(http://(yy.+\.60\.kg|yy.+\.kakiko\.com|bbs\.aristocratism\.info|www.+\.atchs\.jp)/\w+/$)");
+        Regex jbbsBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://(jbbs.livedoor.jp|jbbs.shitaraba.net)/\w+/\d+/)");
+        Regex nichanBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://.+[25]ch\.net/(\w+)/(\d+)/)\s*");
+        Regex yyBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://(yy.+\.60\.kg|yy.+\.kakiko\.com|bbs\.aristocratism\.info|www.+\.atchs\.jp)/\w+/$)");
+        //ぜろちゃんねる
+        Regex zeroBaseRegex = new System.Text.RegularExpressions.Regex(@"(https?://\w+.pgw.jp/$)");
 
         private bool CheckBaseURL()
         {
@@ -327,6 +333,17 @@ namespace SpeechCast
                         Response.Style = Response.BBSStyle.yykakiko;
                         return true;
                     }
+                    else
+                    {
+                        m = zeroBaseRegex.Match(toolStripTextBoxURL.Text);
+                        if (m.Success)
+                        {
+                            baseURL = m.Groups[1].Value;
+                            Response.Style = Response.BBSStyle.zerochan;
+                            return true;
+                        }
+
+                    }
                 }
             }
             return false;
@@ -342,6 +359,7 @@ namespace SpeechCast
 #endif
         private int oldResCount = 0;
         private string oldUrl = "";
+
         // 元ソースより非同期に変更
         private async Task<bool> GetFromURL(bool next)
         {
@@ -361,6 +379,7 @@ namespace SpeechCast
                         clearItems = false;
                         break;
                     case Response.BBSStyle.yykakiko:
+                    case Response.BBSStyle.zerochan:
                     case Response.BBSStyle.nichan:
                         url = rawURL;
                         clearItems = false;
@@ -373,7 +392,9 @@ namespace SpeechCast
             {
 #if DEBUG
                 debugDatFileName = null;
+                AddLog("GO:{0}", toolStripTextBoxURL.Text);
 #endif
+
                 Match m = Communicator.JBBSRegex.Match(toolStripTextBoxURL.Text);
                 if (m.Success)
                 {
@@ -416,6 +437,27 @@ namespace SpeechCast
                             debugDatFileName = m.Groups[3].Value + ".dat";
 #endif
                         }
+                        else
+                        {
+
+                            m = Communicator.ZeroRegex.Match(toolStripTextBoxURL.Text);
+                            if (m.Success)
+                            {
+                                rawURL = m.Groups[1].Value + "/2ch/" + m.Groups[2].Value + "/dat/" + m.Groups[3].Value + ".dat";
+
+                                threadId = m.Groups[3].Value;
+                                AddLog("zero ch dat mode: {0} {1}", rawURL, threadId);
+                                Response.Style = Response.BBSStyle.zerochan;
+                                encodingName = "Shift_JIS";
+                                
+                                baseURL = string.Format("{0}/2ch/{1}/", m.Groups[1], m.Groups[2]);
+
+#if DEBUG
+                                debugDatFileName = m.Groups[3].Value + ".dat";
+#endif
+                            }
+
+                        }
                     }
                 }
 
@@ -423,7 +465,7 @@ namespace SpeechCast
                 if (rawURL == null)
                 {
                     AutoUpdate = false;
-                    MessageBox.Show("サポートしていないＵＲＬです");
+                    MessageBox.Show("サポートしていないURLです");
                     return false;
                 }
                 url = rawURL;
@@ -438,13 +480,19 @@ namespace SpeechCast
                     webBrowser.Document.InvokeScript("clearRes", objArray);
                 }
             }
-
+            
             System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
             // 完全にバックグラウンド処理になったので、メッセージなどはコメントアウト
             //communicationStatusString = "通信中・・・・";
             //PushAndSetWaitCursor();
             int oldResponseCount = responses.Count;
             long responseTime = 0, readTime = 0, listViewTime = 0, documetnTime = 0, encodingTime = 0, setTime = 0;
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                   | SecurityProtocolType.Tls11
+                   | SecurityProtocolType.Tls12
+                   | SecurityProtocolType.Ssl3;
             System.Net.HttpWebResponse webRes = null;
             // タイムアウト等の結果判別用真偽値
             bool webReqResult = true;
@@ -455,6 +503,12 @@ namespace SpeechCast
                 {
                     try
                     {
+
+                        ServicePointManager.Expect100Continue = true;
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                               | SecurityProtocolType.Tls11
+                               | SecurityProtocolType.Tls12
+                               | SecurityProtocolType.Ssl3;
                         System.Net.HttpWebRequest webReq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
                         webReq.KeepAlive = false;
                         FormMain.UserConfig.SetProxy(webReq);
@@ -739,7 +793,8 @@ namespace SpeechCast
                         }
                     }                    
                 }
-                return result;
+                
+            return result;
         }
 
         private List<Response> responses = new List<Response>();
@@ -967,7 +1022,12 @@ namespace SpeechCast
 
                 if (UserConfig.SpeaksResNumber)
                 {
-                    text = string.Format("レス{0}\n{1}", res.Number, text);
+
+//レス番号を表示(読み上げ)部分はここ
+                    //ResbanVisible == true
+                    if (UserConfig.ResbanVisible)
+                        text = string.Format("レス{0}\n{1}", res.Number, text);
+
                 }
 
                 isSpeakingWarningMessage = false;
@@ -1228,6 +1288,13 @@ namespace SpeechCast
             UserConfig.CaptionVisible = FormCaption.Instance.Visible;
         }
 
+        private void toolResbanButtonCaption_Click(object sender, EventArgs e)
+        {
+            FormCaption.Instance.ResbanVisible = !FormCaption.Instance.ResbanVisible;
+            toolResbanButtonCaption.Checked = FormCaption.Instance.ResbanVisible;
+            UserConfig.ResbanVisible = FormCaption.Instance.ResbanVisible;
+        }
+
         private void toolStripButtonBorder_Click(object sender, EventArgs e)
         {
             FormCaption.Instance.BorderVisible = !FormCaption.Instance.BorderVisible;
@@ -1270,6 +1337,7 @@ namespace SpeechCast
         private const int OpenNextThread = 1;
         // 次スレへ移動中(移動中アナウンス管理用)
         private const int SpeakAnnounce = 2;
+        private int endThreadAlertCount = 0;
         private bool endThreadAlertFlg = false;
         private TimeSpan diff;
         private TimeSpan diffWeb;
@@ -1379,6 +1447,7 @@ namespace SpeechCast
                     // AAモードの時のインターバルの設定
                     speakingInvervalMillsec = UserConfig.AAModeInvervalMillsec;
                 }
+
                 // 通常レス読み上げ
                 if (
                     diff.TotalMilliseconds >= speakingInvervalMillsec
@@ -1390,16 +1459,68 @@ namespace SpeechCast
                     if (CurrentResNumber == UserConfig.endThreadWarningResCount && !endThreadWarning)
                     {
                         endThreadWarning = true;
+                        // レス警告時にここでStop
                         while (isSpeaking) ;
                         this.speakendThreadWarning();
+
+/////////////////////////////////////////
+                        //if(endThreadAlertCount != UserConfig.endThreadWarningAlertCount)
+                        //{
+                        //    endThreadAlertCount++;
+                        //}
+                        //else if(endThreadAlertCount > UserConfig.endThreadWarningAlertCount)
+                        //{
+                        //    endThreadAlertCount = 0;
+
+                        //    if(CurrentResNumber == UserConfig.endThreadWarningResCount)
+                        //    {
+                        //        CurrentResNumber++;
+                        //    }
+
+                        //}
+/////////////////////////////////////////
+
+
+                        if (CurrentResNumber == UserConfig.endThreadWarningResCount)
+                        {
+                            CurrentResNumber++;
+                        }
+
+
                     }
                 }
+
                 if (endThreadWarning)
                 {
                     speakingInvervalMillsec = 40 * 1000;
-                    if (diff.TotalMilliseconds >= speakingInvervalMillsec) { 
+                    if (diff.TotalMilliseconds >= speakingInvervalMillsec || endThreadAlertCount < 10)
+                    { 
                         this.speakendThreadWarning();
+                        endThreadAlertCount++;
                     }
+
+/////////////////////////////////////////
+                    //if (endThreadAlertCount != UserConfig.endThreadWarningAlertCount)
+                    //{
+                    //    endThreadAlertCount++;
+                    //}
+                    //else if (endThreadAlertCount > UserConfig.endThreadWarningAlertCount)
+                    //{
+                    //    endThreadAlertCount = 0;
+
+                    //    if (CurrentResNumber == UserConfig.endThreadWarningResCount)
+                    //    {
+                    //        CurrentResNumber++;
+                    //    }
+
+                    //}
+/////////////////////////////////////////
+
+                    if (CurrentResNumber == UserConfig.endThreadWarningResCount)
+                    {
+                        CurrentResNumber++;
+                    }
+
                 }
             }
         }
@@ -1680,6 +1801,7 @@ namespace SpeechCast
         {
             formWriteResponse.IsThreadCreation = false;
 
+            // ここか？
             isformWriteResponse = true;
             try
             {
@@ -1882,7 +2004,7 @@ namespace SpeechCast
         {
             string url = toolStripTextBoxURL.Text;
 
-            if (url.StartsWith("http://"))
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
             {
                 PushAndSetWaitCursor();
                 try
@@ -1900,7 +2022,7 @@ namespace SpeechCast
         {
             string url = Clipboard.GetText();
 
-            if (url.StartsWith("http://"))
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
             {
                 toolStripTextBoxURL.Text = url;
                 GetFromURL();
@@ -2043,6 +2165,7 @@ namespace SpeechCast
             this.openResCaptionForm();
         }
 
+        // 代替文字列
         private void openResCaptionForm()
         {
             if (this.splitContainerResCaption.Panel2.Height > 0)
@@ -2096,6 +2219,9 @@ namespace SpeechCast
             {
                 if (baseURL != null && threadTitle != null)
                 {
+#if DEBUG
+                    AddLog("test url: {0} dat: {1}", baseURL, debugDatFileName);
+#endif
                     // 全角半角変換処理を挟む
                     string searchTitle = zen2han(threadTitle);
                     // 現在のスレタイから連番と思われる部分を抽出
@@ -2111,6 +2237,12 @@ namespace SpeechCast
                     // スレッド一覧の取得
                     string subjectURL = baseURL + "subject.txt";
                     //AddLog(subjectURL);
+
+                    ServicePointManager.Expect100Continue = true;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                           | SecurityProtocolType.Tls11
+                           | SecurityProtocolType.Tls12
+                           | SecurityProtocolType.Ssl3;
                     System.Net.HttpWebRequest webReq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(subjectURL);
                     FormMain.UserConfig.SetProxy(webReq);
                     string encodingName = null;
@@ -2121,10 +2253,17 @@ namespace SpeechCast
                             encodingName = "EUC-JP";
                             break;
                         case Response.BBSStyle.yykakiko:
+                        case Response.BBSStyle.zerochan:
                         case Response.BBSStyle.nichan:
                             encodingName = "Shift_JIS";
                             break;
                     }
+
+                    ServicePointManager.Expect100Continue = true;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                           | SecurityProtocolType.Tls11
+                           | SecurityProtocolType.Tls12
+                           | SecurityProtocolType.Ssl3;
                     System.Net.HttpWebResponse webRes = null;
                     try
                     {
@@ -2182,6 +2321,9 @@ namespace SpeechCast
                             //一致した対象が見つかったときキャプチャした部分文字列を表示
                             threadId = m3.Value;
                         }
+#if DEBUG
+                        AddLog("test url: {0} dat: {1}", baseURL, debugDatFileName);
+#endif
                         // スレッドURLを生成
                         string threadUrl = Communicator.Instance.getThreadUrl(baseURL, threadId);
                         if (threadUrl.Length > 0)
@@ -2239,6 +2381,7 @@ namespace SpeechCast
         }
 
         private string dateformat = "hh:mm";
+        private string dateformatms = "hh:mm:ss.ff";
         private void buttonCaptionClock_Click(object sender, EventArgs e)
         {
             insertTextBox(this.textBoxDefaultCaption,"#CLOCK#");
@@ -2270,11 +2413,13 @@ namespace SpeechCast
             if (checkBoxClockMilitaryTime.Checked)
             {
                 dateformat = dateformat.Replace("hh", "HH");
+                dateformatms = dateformatms.Replace("hh", "HH");
                 UserConfig.MilitaryTime = true;
             }
             else
             {
                 dateformat = dateformat.Replace("HH", "hh");
+                dateformatms = dateformatms.Replace("HH", "hh");
                 UserConfig.MilitaryTime = false;
             }
         }
@@ -2294,16 +2439,23 @@ namespace SpeechCast
             }
         }
 
+        // 代替文字列
         private void buttonSpeakCaptionText_Click(object sender, EventArgs e)
         {
-            if (CaptionTextBuffer.Replace("#1#", comboBoxCaptionNum1.SelectedIndex.ToString()).Replace("#2#", comboBoxCaptionNum2.SelectedIndex.ToString()).Replace("#CLOCK#", objDate.ToString(dateformat)).Length>0)
-                StartSpeaking(CaptionTextBuffer.Replace("#1#", comboBoxCaptionNum1.SelectedIndex.ToString()).Replace("#2#", comboBoxCaptionNum2.SelectedIndex.ToString()).Replace("#CLOCK#", objDate.ToString(dateformat)));
+            if (CaptionTextBuffer.Replace("#1#", comboBoxCaptionNum1.SelectedIndex.ToString()).Replace("#2#", comboBoxCaptionNum2.SelectedIndex.ToString()).Replace("#CLOCK#", objDate.ToString(dateformat)).Replace("#CLOCKms#", objDate.ToString(dateformatms)).Length>0)
+                StartSpeaking(CaptionTextBuffer.Replace("#1#", comboBoxCaptionNum1.SelectedIndex.ToString()).Replace("#2#", comboBoxCaptionNum2.SelectedIndex.ToString()).Replace("#CLOCK#", objDate.ToString(dateformat)).Replace("#CLOCKms#", objDate.ToString(dateformatms)));
         }
 
         private void textBoxDefaultCaption_Changed(object sender, EventArgs e)
         {
             CaptionTextBuffer = textBoxDefaultCaption.Text;
         }
+        private void textBoxDefaultCaption_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.A)
+                textBoxDefaultCaption.SelectAll();
+        }
+
         public void insertTextBox(TextBox targetText, string msg)
         {
             if (targetText.SelectedText.Length == 0)

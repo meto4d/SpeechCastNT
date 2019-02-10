@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("SpeechCast")]
+[assembly: AssemblyTitle("SpeechCastNT")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("すれいまん")]
-[assembly: AssemblyProduct("SpeechCast")]
-[assembly: AssemblyCopyright("Copyright © すれいまん 2014 Copyright © よっしー 2008,2009,2013")]
+[assembly: AssemblyCompany("Ruth")]
+[assembly: AssemblyProduct("SpeechCastNT")]
+[assembly: AssemblyCopyright("Copyright © Ruth 2019 Copyright © Ruth 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 次の GUID は、このプロジェクトが COM に公開される場合の、typelib の ID です
-[assembly: Guid("f4d5c64a-2600-404d-9847-08d42b1bdcf2")]
+[assembly: Guid("194F99D3-AEEA-439C-8E60-991F7F487AB6")]
 
 // アセンブリのバージョン情報は、以下の 4 つの値で構成されています:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // すべての値を指定するか、下のように '*' を使ってビルドおよびリビジョン番号を 
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.1.23")]
-[assembly: AssemblyFileVersion("2.0.1.23")]
+[assembly: AssemblyVersion("1.0.0.3")]
+[assembly: AssemblyFileVersion("1.0.0.3")]

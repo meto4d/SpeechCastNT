@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     static class Program
     {

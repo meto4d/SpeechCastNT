@@ -7,8 +7,9 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Net;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public partial class FormBBSThreads : Form
     {
@@ -33,12 +34,18 @@ namespace SpeechCast
             Cursor = pushedCursor;
         }
 
+        const SecurityProtocolType https = SecurityProtocolType.Tls
+                   | SecurityProtocolType.Tls11
+                   | SecurityProtocolType.Tls12
+                   | SecurityProtocolType.Ssl3;
 
         private void UpdateThreads()
         {
             string subjectURL = BaseURL + "subject.txt";
             System.Console.WriteLine(subjectURL);
-            System.Net.HttpWebRequest webReq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(subjectURL);
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = https;
+            HttpWebRequest webReq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(subjectURL);
             FormMain.UserConfig.SetProxy(webReq);
 
             string encodingName = null;
@@ -55,6 +62,9 @@ namespace SpeechCast
                     break;
             }
             //encodingName = "Shift_JIS";
+
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = https;
             System.Net.HttpWebResponse webRes = null;
             bBSThreads.Clear();
 
@@ -199,6 +209,7 @@ namespace SpeechCast
         private FormWrite formThreadWrite = new FormWrite();
         static Regex threadTitleRegex = new System.Text.RegularExpressions.Regex(@"(.+)(\d+)(\D*)", RegexOptions.CultureInvariant);
 
+        // スレ建て
         private void buttonCreate_Click(object sender, EventArgs e)
         {
             //if (Response.Style == Response.BBSStyle.nichan)

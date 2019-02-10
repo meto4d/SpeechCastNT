@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public class Bookmarks
     {

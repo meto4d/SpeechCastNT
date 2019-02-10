@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public partial class FormWrite : Form
     {
@@ -124,7 +124,7 @@ namespace SpeechCast
             }
         }
 
-        private void buttonRunEditor_GetEditorFilePath(object sender, SpeechCast.Controls.EventEditorArgs e)
+        private void buttonRunEditor_GetEditorFilePath(object sender, SpeechCastNT.Controls.EventEditorArgs e)
         {
             e.EditorFilePath = FormMain.UserConfig.EditorFilePath;
         }

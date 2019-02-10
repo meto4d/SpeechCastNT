@@ -1,4 +1,4 @@
-﻿namespace SpeechCast
+﻿namespace SpeechCastNT
 {
     partial class FormCaption
     {
@@ -56,6 +56,8 @@
             this.Move += new System.EventHandler(this.FormCaption_Move);
             this.Resize += new System.EventHandler(this.FormCaption_Resize);
             this.ResumeLayout(false);
+            
+            
 
         }
 

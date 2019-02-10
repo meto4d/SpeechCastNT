@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     class BBSThread
     {
@@ -48,6 +48,7 @@ namespace SpeechCast
                         break;
                     }
                 case Response.BBSStyle.yykakiko:
+                case Response.BBSStyle.zerochan:
                 case Response.BBSStyle.nichan:
                     {
                         Match m = nichanRegex.Match(rawText);

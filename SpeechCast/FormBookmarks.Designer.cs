@@ -1,4 +1,4 @@
-﻿namespace SpeechCast
+﻿namespace SpeechCastNT
 {
     partial class FormBookmarks
     {
@@ -42,7 +42,7 @@
             this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
             this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
-            this.myMenuStrip1 = new SpeechCast.Controls.MyMenuStrip();
+            this.myMenuStrip1 = new SpeechCastNT.Controls.MyMenuStrip();
             this.toolStripMenuItemEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddBookmak = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAddFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -267,7 +267,7 @@
         private System.Windows.Forms.ListView listView;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
-        private SpeechCast.Controls.MyMenuStrip myMenuStrip1;
+        private SpeechCastNT.Controls.MyMenuStrip myMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdit;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddBookmak;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddFolder;

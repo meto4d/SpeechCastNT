@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
-namespace SpeechCast
+namespace SpeechCastNT
 {
     public class UserConfig
     {
@@ -22,7 +22,7 @@ namespace SpeechCast
         {
             Pronounciations.AddRange(new string[]
                 {
-                    @"(http|ttp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/リンク",
+                    @"(http|ttp)(.:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)/リンク",
                     @"ww+/ワラワラ",
                     @"ｗｗ+/ワラワラ",
                     @"(w|ｗ)\s*$/ワラ",
@@ -218,6 +218,11 @@ namespace SpeechCast
         public int endThreadWarningResCount = 950;
 
         /// <summary>
+        /// レス番号を読み上げる？
+        /// </summary>
+        public int endThreadWarningAlertCount = 5;
+
+        /// <summary>
         /// AAモード時にレス番号を読み上げる？
         /// </summary>
         public bool SpeaksResNumberWhenAAMode = true;
@@ -307,6 +312,12 @@ namespace SpeechCast
 
 
         /// <summary>
+        /// レス番を表示するか？
+        /// </summary>
+        public bool ResbanVisible = true;
+
+
+        /// <summary>
         /// 字幕ウィンドウのタイトル(SpeechCast)を隠すか？
         /// </summary>
         public bool HideCaptionTitle = false;
@@ -314,7 +325,30 @@ namespace SpeechCast
         /// <summary>
         /// インターネットオプションで設定したプロキシを使用？
         /// </summary>
-        public bool UseDefaultProxy = true;
+        public bool UseDefaultProxy = false;
+
+///////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// ユーザーの指定したプロキシを使用
+        /// </summary>
+        public bool proxy_use = false;
+        /// <summary>
+        /// ユーザーの指定したプロキシを使用
+        /// </summary>
+        public string proxy_host = "";
+        /// <summary>
+        /// ユーザーの指定したプロキシを使用
+        /// </summary>
+        public string proxy_port = "";
+        /// <summary>
+        /// ユーザーの指定したプロキシを使用
+        /// </summary>
+        public string proxy_url = "";
+        /// <summary>
+        /// ユーザーの指定したプロキシを使用
+        /// </summary>
+        public bool proxy_notuse = true;
+///////////////////////////////////////////////////////////////////////////
 
         /// <summary>
         /// 字幕を瞬間表示する？
@@ -698,7 +732,16 @@ namespace SpeechCast
             }
             else
             {
-                webRequest.Proxy = null;
+
+                if (proxy_use)
+                {
+                    proxy_url = proxyUrl(proxy_host, proxy_port);
+                    webRequest.Proxy = new System.Net.WebProxy(proxy_url);
+                }
+                else
+                {
+                    webRequest.Proxy = null;
+                }
             }
         }
 
@@ -710,7 +753,64 @@ namespace SpeechCast
             }
             else
             {
-                return null;
+
+                if (proxy_use)
+                {
+                    proxy_url = proxyUrl(proxy_host, proxy_port);
+                    return (new System.Net.WebProxy(proxy_url));
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public string proxyUrl(string host, string port)
+        {
+
+            int de_port = 80;
+            Regex http_is = new Regex("^http://");
+            Regex port_is = new Regex(":[0-9]+/?$");
+            Match http_match;
+            string urlProxy;
+
+            if(host.Length > 1)
+            {
+                
+                http_match = http_is.Match(host);
+                if(!http_match.Success)
+                {
+                    urlProxy = String.Format("http://{0}", host);
+                }
+                else
+                {
+                    urlProxy = host;
+                }
+                
+                http_match = port_is.Match(urlProxy);
+                if(!http_match.Success)
+                {
+
+                    if (port.Length > 1)
+                    {
+                        if (!Int32.TryParse(port, out de_port))
+                        {
+                            de_port = 80;
+                        }
+
+                    }
+
+                    urlProxy = String.Format("{0}:{1}", urlProxy, de_port);
+                }
+
+                return urlProxy;
+
+            }
+            else
+            {
+
+                return "";
             }
         }
 
